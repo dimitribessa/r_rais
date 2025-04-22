@@ -49,7 +49,7 @@ Google BigQuery, torna o processo de ETL bem leve e rápido. Entretanto, como qu
 O processo a seguir consiste em i. baixar o arquivo compactado para um diretório temporário, ii. extrair e por fim iii. ler os dados brutos. Como os 
 arquivos são muito grandes e pesados, este processo leva um certo tempo. Todavia
 uma opção mais célere é fazer diretamente os passos i. e ii., sem os comandos do R. Também caso se queira com dados de vários anos ou estados simultaneamente, recomendo
-seguir os passos disponibilizados por **Matheis Stivali**, podendo ser acessados [aqui](https://rpubs.com/mstivali/RAIS1).
+seguir os passos disponibilizados por **Matheus Stivali**, podendo ser acessados [aqui](https://rpubs.com/mstivali/RAIS1).
 
 
 ```{r include = F}
@@ -72,7 +72,7 @@ seguir os passos disponibilizados por **Matheis Stivali**, podendo ser acessados
 ```{r}
 dim(dado)
 ```
-O objeto _dado_ é um data.frame com 14.859.895 linhas e 60 colunas e que contém as informações de vínculos de trabalho dos estados da região sul. 
+O objeto _dado_ é um data.frame com 13.873.188 linhas e 60 colunas e que contém as informações de vínculos de trabalho dos estados da região sul. 
 Os passos a seguir resume-se em formatar os nomes dos vetores e criar a variável _uf_ (a partir do código IBGE do município),
  em vista que sintetizarei a análise a apenas ao estado de Santa Catarina.
 
@@ -214,7 +214,7 @@ geom_vline(xintercept = tab_summary$Moda, linetype = 'dashed', color = '#f42e13'
 geom_vline(xintercept = tab_summary$Median, linetype = 'dotdash', color = '#f42e13') +
 geom_vline(xintercept = tab_summary$`X3rd.Qu.`, linetype = 'dotted', color = '#f42e13') +
 ggrepel::geom_label_repel(data = label, aes(x = posicao,
-           y = rep(100000,4), label = label), size =6) +
+           y = rep(100000,4), label = label), size =4) +
 xlab('Salário Nominal\n(R$ em dez/2024)') +
 ylab('Qtde de\nIndivíduos')
 ```
@@ -262,14 +262,15 @@ kable(tab_salario_faixa_pop,align = "c",
 ```
 
 Por fim, uma maneira gráfica de ilustrar as diferenças salariais entre os homens e as mulheres é um gráfico _quantis x quantis_ (q x q), ou seja, 
-um gráfico ordenado dos quantis dos salários dos homens contra os mesmos quantis dos salários das mulheres.
+um gráfico ordenado dos quantis dos salários dos homens contra os mesmos quantis dos salários das mulheres (de novo, por conta de outliers, elaborei 
+o gráfico terminando no quantil 95).
 
 ```{r}
 qq_data <- with(dado[dado$vl_remun_dezembro_nom > 0,],
          split(vl_remun_dezembro_nom, sexo_trabalhador))
 
-qq_data <- data.frame('Homens' = quantile(qq_data[[1]], probs = seq(0, 1, 0.005)),
-            'Mulheres' = quantile(qq_data[[2]], probs = seq(0,1, 0.005)))
+qq_data <- data.frame('Homens' = quantile(qq_data[[1]], probs = seq(0, .95, 0.005)),
+            'Mulheres' = quantile(qq_data[[2]], probs = seq(0,.95, 0.005)))
 
  ggplot(qq_data , aes(x =Homens, 
                        y = Mulheres)) + 
